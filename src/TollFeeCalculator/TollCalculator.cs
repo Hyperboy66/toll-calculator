@@ -59,16 +59,18 @@ public class TollCalculator
         int hour = date.Hour;
         int minute = date.Minute;
 
-        if (hour == 6 && minute >= 0 && minute <= 29) return 8;
-        else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
-        else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
-        else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-        else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
-        else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
-        else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
-        else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
-        else if (hour == 18 && minute >= 0 && minute <= 29) return 8;
-        else return 0;
+        int totalMinutes = hour * 60 + minute;
+
+        if (totalMinutes >= 360 && totalMinutes <= 389) return 8;	        // 06:00 to 06:29
+        else if (totalMinutes >= 390 && totalMinutes <= 419) return 13;	    // 06:30 to 06:59
+        else if (totalMinutes >= 420 && totalMinutes <= 479) return 18;	    // 07:00 to 07:59
+        else if (totalMinutes >= 480 && totalMinutes <= 509) return 13;	    // 08:00 to 08:29
+        else if (totalMinutes >= 510 && totalMinutes <= 899) return 8;	    // 08:30 to 14:59
+        else if (totalMinutes >= 900 && totalMinutes <= 929) return 13;	    // 15:00 to 15:29
+        else if (totalMinutes >= 930 && totalMinutes <= 1019) return 18;	// 15:30 to 16:59
+        else if (totalMinutes >= 1020 && totalMinutes <= 1079) return 13;	// 17:00 to 17:59
+        else if (totalMinutes >= 1080 && totalMinutes <= 1109) return 8;	// 18:00 to 18:29
+        else return 0;                                                      // 18:30 to 23:59 and 00:00 to 05:59 (not charged)
     }
 
     private Boolean IsTollFreeDate(DateTime date)
