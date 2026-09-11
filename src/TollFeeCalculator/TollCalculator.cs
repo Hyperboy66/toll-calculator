@@ -8,6 +8,10 @@ public class TollCalculator
     /**
      * Calculate the total toll fee for one day
      *
+     * Passages within 60 minutes of each other are grouped into the same
+     * charging window. Only the highest single fee within each window is
+     * counted; separate windows (more than 60 minutes apart) are summed.
+     *
      * @param vehicle - the vehicle
      * @param dates   - date and time of all passes on one day
      * @return - the total toll fee for that day
@@ -17,22 +21,32 @@ public class TollCalculator
     {
         DateTime intervalStart = dates[0];
         int totalFee = 0;
+        int currentWindowFee = 0; // fee currently counted toward totalFee for the active window
+
         foreach (DateTime date in dates)
         {
             int nextFee = GetTollFee(date, vehicle);
-            int tempFee = GetTollFee(intervalStart, vehicle);
 
-            long diffInMillies = date.Millisecond - intervalStart.Millisecond;
-            long minutes = diffInMillies/1000/60;
+            TimeSpan diff = date - intervalStart;
 
-            if (minutes <= 60)
+            double diffInMinutes = diff.TotalMinutes;
+
+            if (diffInMinutes <= 60)
             {
-                if (totalFee > 0) totalFee -= tempFee;
-                if (nextFee >= tempFee) tempFee = nextFee;
-                totalFee += tempFee;
+                // A higher fee appeared in this window: replace what was previously
+                // counted with the new, higher fee.
+                if (nextFee > currentWindowFee)
+                {
+                    totalFee -= currentWindowFee;
+                    totalFee += nextFee;
+                    currentWindowFee = nextFee;
+                }
             }
             else
             {
+                // More than 60 minutes since the window started: begin a new window.
+                intervalStart = date;
+                currentWindowFee = nextFee;
                 totalFee += nextFee;
             }
         }
