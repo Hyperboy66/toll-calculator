@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Runtime.ConstrainedExecution;
 using TollFeeCalculator;
 using Xunit;
+using static System.Net.Mime.MediaTypeNames;
 
 public class TollCalculatorTests
 {
@@ -102,6 +104,19 @@ public class TollCalculatorTests
         Vehicle stubVehicle = new StubVehicle(vehicle);    
         var date = new DateTime(year, month, day, hour, minute, 0);
         int actualFee = calculator.GetTollFee(date, stubVehicle);
+
+        Assert.Equal(expectedFee, actualFee);
+    }
+
+    [Fact]
+    public void GetTollFee_For_Tollfree_Vehicle_Type_Motorbike_ReturnsExpectedFee()
+    {
+        var calculator = new TollCalculator();
+
+        var motorbike = new Motorbike();
+        var date = new DateTime(2013, 2, 7, 7, 30, 0);
+        int actualFee = calculator.GetTollFee(date, motorbike);
+        int expectedFee = 0; // Motorbike is tollfree
 
         Assert.Equal(expectedFee, actualFee);
     }
