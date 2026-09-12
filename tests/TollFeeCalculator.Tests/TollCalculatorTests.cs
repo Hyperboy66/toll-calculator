@@ -36,4 +36,20 @@ public class TollCalculatorTests
 
         Assert.Equal(expectedFee, actualFee);
     }
+
+    [Theory]
+    [InlineData(7, 30, 0)]     // would normally cost 18 kr on a weekday, but the date is a toll-free Saturday
+    [InlineData(15, 30, 0)]    // would normally cost 18 kr on a weekday, but the date is a toll-free Saturday
+    [InlineData(5, 59, 0)]     // already fee-free on a weekday too; included as a control case
+
+    public void GetTollFee_GivenTimeOfDay_On_A_Tollfree_Day_ReturnsExpectedFee(int hour, int minute, int expectedFee)
+    {
+        var calculator = new TollCalculator();
+        var car = new Car();
+        var date = new DateTime(2013, 2, 9, hour, minute, 0); // a tollfree day (saturday)
+
+        int actualFee = calculator.GetTollFee(date, car);
+
+        Assert.Equal(expectedFee, actualFee);
+    }
 }

@@ -24,6 +24,13 @@ public class TollCalculatorDailyFeeTests
     [Theory]
     [InlineData(15, 15, 15, 45, 18)]      // Two passages within an hour with different fees, return highest fee -> 18 kr
     [InlineData(06, 15, 17, 30, 21)]      // Two passages during the day an hour with different fees, return sum of both fees -> 21 kr
+    [InlineData(06, 30, 07, 29, 18)]      // Two passages during the day an hour with different fees, (59 minutes span between passages), return fee -> 18 kr
+    [InlineData(06, 30, 07, 30, 18)]      // Two passages during the day an hour with different fees, (60 minutes span between passages), fee -> 18 kr
+    [InlineData(06, 30, 07, 31, 31)]      // Two passages during the day an hour with different fees, (61 minutes span between passages), return sum of both fees -> 31 kr
+
+
+
+
 
     public void GetTollFee_Vehicle_passes_twice_ReturnsExpectedFee(int hour1, int minute1, int hour2, int minute2, int expectedFee)
     {
@@ -74,6 +81,28 @@ public class TollCalculatorDailyFeeTests
         };
 
         int expectedFee = 44; // expectedFee = 18+8+18 = 44
+
+        int actualFee = calculator.GetTollFee(car, passages);
+
+        Assert.Equal(expectedFee, actualFee);
+    }
+
+    [Fact]
+    public void GetTollFee_Vehicle_passes_four_times_combined_fee_exceeds_daily_limit_60_kr_ReturnsExpectedFee()
+    {
+        var calculator = new TollCalculator();
+        var car = new Car();
+
+        // Four passages spread across the day, individual fees added (67 kr) exceeds limit (60 kr) which is the fee rturned.
+        DateTime[] passages = new DateTime[]
+        {
+            new DateTime(2013, 2, 7, 6, 45, 0),  // = 13
+            new DateTime(2013, 2, 7, 7, 55, 0),  // = 18
+            new DateTime(2013, 2, 7, 15, 30, 0), // = 18  
+            new DateTime(2013, 2, 7, 16, 35, 0) // = 18
+        };
+
+        int expectedFee = 60; // Daily limit fee
 
         int actualFee = calculator.GetTollFee(car, passages);
 
