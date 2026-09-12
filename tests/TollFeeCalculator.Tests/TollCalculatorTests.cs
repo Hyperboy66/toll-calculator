@@ -52,4 +52,25 @@ public class TollCalculatorTests
 
         Assert.Equal(expectedFee, actualFee);
     }
+
+    [Theory]
+    [InlineData(2013, 7, 1, 7, 30, 0)]     // would normally cost 18 kr on a weekday, but the date is a toll-free day in July
+    [InlineData(2013, 12, 23, 7, 30, 18)]    // costs 18 kr on a weekday, not toll-free
+    [InlineData(2013, 12, 24, 7, 30, 0)]     // Toll free day (christmas eve)
+    [InlineData(2014, 1, 1, 7, 30, 18)]     // Should be toll free day (new years day) but only year 2013 is covered in holiday logic.
+
+
+    public void GetTollFee_On_A_Hardcoded_Holiday_Date_ReturnsExpectedFee(int year, int month, int day, int hour, int minute, int expectedFee)
+    {
+        var calculator = new TollCalculator();
+        var car = new Car();
+
+        var date = new DateTime(year, month, day, hour, minute, 0);
+        int actualFee = calculator.GetTollFee(date, car);
+
+        Assert.Equal(expectedFee, actualFee);
+    }
+
+
+
 }
