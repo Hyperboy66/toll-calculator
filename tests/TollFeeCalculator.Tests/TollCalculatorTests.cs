@@ -71,6 +71,38 @@ public class TollCalculatorTests
         Assert.Equal(expectedFee, actualFee);
     }
 
+    private class StubVehicle : Vehicle
+    {
+        private readonly string _vehicleType;
+        
+        public StubVehicle(string vehicleType)
+        {
+            _vehicleType = vehicleType;
+        }
 
+        public string GetVehicleType()
+        {
+            return _vehicleType;
+        }
+    }
 
+    [Theory]
+    [InlineData("Motorbike", 2013, 2, 7, 7, 30, 0)]    // would normally cost 18 kr but Motorbike is tollfree
+    [InlineData("Tractor",  2013, 2, 7, 7, 30, 0)]     // would normally cost 18 kr but Tractor is tollfree
+    [InlineData("Emergency", 2013, 2, 7, 7, 30, 0)]    // would normally cost 18 kr but Emergency is tollfree
+    [InlineData("Diplomat", 2013, 2, 7, 7, 30, 0)]     // would normally cost 18 kr but Diplomat is tollfree
+    [InlineData("Foreign", 2013, 2, 7, 7, 30, 0)]      // would normally cost 18 kr but Foreign is tollfree
+    [InlineData("Military", 2013, 2, 7, 7, 30, 0)]     // would normally cost 18 kr but Military is tollfree
+    [InlineData("Spaceship", 2013, 2, 7, 7, 30, 18)]   // Unrecognized vehicle type, treated as a regular (non-toll-free) vehicle.
+    [InlineData("Car", 2013, 2, 7, 7, 30, 18)]         // Not tollfree, will cost 18
+    
+    public void GetTollFee_For_Tollfree_Vehicle_Types_ReturnsExpectedFee(string vehicle, int year, int month, int day, int hour, int minute, int expectedFee)
+    {
+        var calculator = new TollCalculator();
+        Vehicle stubVehicle = new StubVehicle(vehicle);    
+        var date = new DateTime(year, month, day, hour, minute, 0);
+        int actualFee = calculator.GetTollFee(date, stubVehicle);
+
+        Assert.Equal(expectedFee, actualFee);
+    }
 }
